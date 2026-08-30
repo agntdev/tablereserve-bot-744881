@@ -8,7 +8,7 @@
           {
             "method": "sendMessage",
             "payload": {
-              "text": "ℹ️ Tap /start to open the menu, then pick what you want from the buttons.\n\nEverything in this bot is reachable by tapping — you don't need to remember any commands."
+              "text": "Book a table in a few taps. Choose your date, arrival time, and party size, then keep your confirmation reference handy. Owners can also use /today and /upcoming."
             }
           }
         ]

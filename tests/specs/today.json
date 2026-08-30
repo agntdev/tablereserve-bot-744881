@@ -7,7 +7,7 @@
           {
             "method": "sendMessage",
             "payload": {
-              "text": "Shows owner today's bookings"
+              "text": "Owner access isn't set up yet."
             }
           }
         ],

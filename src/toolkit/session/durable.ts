@@ -14,6 +14,7 @@
  */
 
 import type { StorageAdapter } from "grammy";
+import { now } from "../../time.js";
 
 // Minimal shapes so this file type-checks without pulling @cloudflare/workers-types
 // into the Node build. The real bindings are provided by the Workers runtime.
@@ -49,6 +50,7 @@ interface Reminder {
   at: number; // epoch ms
   chatId: number | string;
   text: string;
+  replyMarkup?: unknown;
 }
 
 /**
@@ -93,12 +95,13 @@ export async function remindAt(
   chatId: number | string,
   whenEpochMs: number,
   text: string,
+  replyMarkup?: unknown,
 ): Promise<void> {
   try {
     const stub = env.CHAT_DO.get(env.CHAT_DO.idFromName("chat:" + chatId));
     await stub.fetch("https://do/remind", {
       method: "POST",
-      body: JSON.stringify({ at: whenEpochMs, chatId, text } satisfies Reminder),
+      body: JSON.stringify({ at: whenEpochMs, chatId, text, replyMarkup } satisfies Reminder),
     });
   } catch {
     /* best-effort: a reminder we couldn't schedule must not break the reply */
@@ -160,12 +163,12 @@ export class ChatDO {
   // Fires at the earliest reminder's wall-clock time. Sends every due reminder,
   // drops them, and re-arms for whatever remains.
   async alarm(): Promise<void> {
-    const now = Date.now();
+    const current = now().getTime();
     const list = (await this.state.storage.get<Reminder[]>("reminders")) ?? [];
-    const due = list.filter((r) => r.at <= now);
-    const rest = list.filter((r) => r.at > now);
+    const due = list.filter((r) => r.at <= current);
+    const rest = list.filter((r) => r.at > current);
     for (const r of due) {
-      await tg(this.env.BOT_TOKEN, "sendMessage", { chat_id: r.chatId, text: r.text });
+      await tg(this.env.BOT_TOKEN, "sendMessage", { chat_id: r.chatId, text: r.text, reply_markup: r.replyMarkup });
     }
     await this.state.storage.put("reminders", rest);
     await this.rearm(rest);
