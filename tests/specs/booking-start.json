@@ -5,9 +5,9 @@
       {
         "expect": [
           {
-            "method": "sendMessage",
+            "method": "editMessageText",
             "payload": {
-              "text": "Initiates reservation flow"
+              "text": "Choose a date for your table."
             }
           }
         ],
